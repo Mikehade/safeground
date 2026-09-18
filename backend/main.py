@@ -29,6 +29,14 @@ logger = get_logger()
 load_dotenv(find_dotenv())
 FASTAPI_ENV = os.getenv("APP_ENV", "development").lower()
 
+# API root used when FastAPI is behind a reverse proxy such as Nginx.
+# Empty/missing value means the API is served from "/".
+API_ROOT = os.getenv("API_ROOT", "").strip().rstrip("/")
+
+# Ensure root_path is either "" or starts with "/"
+if API_ROOT and not API_ROOT.startswith("/"):
+    API_ROOT = f"/{API_ROOT}"
+
 
 def create_app() -> FastAPI:
     container = Container()
@@ -45,6 +53,7 @@ def create_app() -> FastAPI:
         title="SafeGround API",
         description="Community safety intelligence — zero identity, zero tracking.",
         version="0.1.0",
+        root_path=API_ROOT,
         docs_url="/api/v1/docs",
     )
 
