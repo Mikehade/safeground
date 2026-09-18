@@ -1,0 +1,47 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+
+.leaflet-container {
+  height: 100%;
+  width: 100%;
+}
+
+/* Markdown rendering inside advisory */
+.advisory-content h1 { font-size: 1.25rem; font-weight: 700; margin-top: 1.5rem; margin-bottom: 0.5rem; }
+.advisory-content h2 { font-size: 1.1rem; font-weight: 600; margin-top: 1.25rem; margin-bottom: 0.4rem; }
+.advisory-content h3 { font-size: 1rem; font-weight: 600; margin-top: 1rem; margin-bottom: 0.35rem; }
+.advisory-content p { margin-bottom: 0.5rem; line-height: 1.6; }
+.advisory-content ul, .advisory-content ol { margin-left: 1.25rem; margin-bottom: 0.5rem; }
+.advisory-content li { margin-bottom: 0.25rem; line-height: 1.5; }
+.advisory-content hr { border: none; border-top: 1px solid #d8d5cf; margin: 1rem 0; }
+.advisory-content blockquote {
+  border-left: 3px solid #d8d5cf;
+  padding-left: 0.75rem;
+  margin: 0.5rem 0;
+  color: #555;
+  font-size: 0.9rem;
+}
+.advisory-content table { width: 100%; border-collapse: collapse; margin: 0.75rem 0; font-size: 0.85rem; }
+.advisory-content th, .advisory-content td { border: 1px solid #d8d5cf; padding: 0.4rem 0.6rem; text-align: left; }
+.advisory-content th { background: #f3f2ef; font-weight: 600; }
+.advisory-content strong { font-weight: 600; }
+.advisory-content code { background: #f3f2ef; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.9em; }
+
+/* Scrollbar styling */
+.sidebar-scroll::-webkit-scrollbar { width: 4px; }
+.sidebar-scroll::-webkit-scrollbar-thumb { background: #d8d5cf; border-radius: 2px; }
+.main-scroll::-webkit-scrollbar { width: 6px; }
+.main-scroll::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
+
+/* Risk badges */
+.risk-low { background: #ecfdf5; color: #15803d; }
+.risk-moderate { background: #fffbeb; color: #b45309; }
+.risk-high { background: #fef2f2; color: #b91c1c; }
+.risk-critical { background: #fef2f2; color: #7f1d1d; }
