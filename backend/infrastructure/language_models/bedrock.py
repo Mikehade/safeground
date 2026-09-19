@@ -83,6 +83,33 @@ class BedrockModel(BaseLLMModel):
         session = self._get_session(region or self.region_name)
         return session.client("bedrock-runtime", config=self.boto_config)
 
+    def _build_payload(
+        self,
+        messages: List[Dict[str, Any]],
+        system: Optional[str] = None,
+        enable_tools: bool = False,
+        temperature: Optional[float] = None,
+        max_tokens: Optional[int] = None,
+        model_id: Optional[str] = None,
+        **kwargs,
+    ) -> Dict[str, Any]:
+        effective_model_id = model_id or self.model_id
+        payload: Dict[str, Any] = {
+            "modelId": effective_model_id,
+            "messages": messages,
+            "inferenceConfig": {
+                "temperature": temperature or self.temperature,
+                "maxTokens": max_tokens or self.max_tokens,
+            },
+        }
+        if system:
+            payload["system"] = [{"text": system}]
+        if enable_tools and self.tool_registry:
+            tool_config = self.tool_registry.generate_tool_config()
+            if tool_config and tool_config.get("tools"):
+                payload["toolConfig"] = tool_config
+        return payload
+
     async def invoke(
         self,
         messages: List[Dict[str, Any]],
@@ -95,24 +122,9 @@ class BedrockModel(BaseLLMModel):
         region: Optional[str] = None,
         **kwargs,
     ) -> Dict[str, Any]:
-        effective_model_id = model_id or self.model_id
-        payload: Dict[str, Any] = {
-            "modelId": effective_model_id,
-            "messages": messages,
-            "inferenceConfig": {
-                "temperature": temperature or self.temperature,
-                "maxTokens": max_tokens or self.max_tokens,
-            },
-        }
-
-        if system:
-            payload["system"] = [{"text": system}]
-
-        if enable_tools and self.tool_registry:
-            tool_config = self.tool_registry.generate_tool_config()
-            if tool_config and tool_config.get("tools"):
-                payload["toolConfig"] = tool_config
-
+        payload = self._build_payload(
+            messages, system, enable_tools, temperature, max_tokens, model_id,
+        )
         async with await self._get_client(region=region) as client:
             response = await client.converse(**payload)
             return response

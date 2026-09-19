@@ -7,7 +7,7 @@ while the agent runs in a concurrent task.
 Stream events (one JSON per line):
   {"type":"status",  "message":"Analyzing routes from A to B..."}
   {"type":"tool",    "name":"search_content", "message":"Searching web: \"...\""}
-  {"type":"advisory","text":"# Route Advisory\n...full markdown..."}
+  {"type":"token",   "text":"chunk"}          ← advisory text in word-groups
   {"type":"done",    "tool_calls":17}
   {"type":"error",   "message":"..."}
 """
@@ -84,11 +84,25 @@ class _ToolEventCollector:
         return await self._original(tool_name, tool_input)
 
 
+def _chunk_text(text: str, size: int = 4) -> list[str]:
+    """Split text into word-groups for simulated token streaming."""
+    words = text.split(" ")
+    chunks = []
+    for i in range(0, len(words), size):
+        chunk = " ".join(words[i : i + size])
+        # Preserve the space that split consumed (except at the start)
+        if chunks:
+            chunk = " " + chunk
+        chunks.append(chunk)
+    return chunks
+
+
 async def _run_agent(scout_agent, msg: str, ctx: dict, queue: asyncio.Queue):
     """
     Run the scout agent in a background task.
     Tool events are pushed to the queue by _ToolEventCollector as they happen.
-    The final result (or error) is pushed as the last item.
+    After the agent finishes, the advisory text is chunked and pushed as
+    token events to give the UI a streaming-text effect.
     """
     original_execute = scout_agent.tool_registry.execute_tool
     collector = _ToolEventCollector(original_execute, queue)
@@ -107,10 +121,14 @@ async def _run_agent(scout_agent, msg: str, ctx: dict, queue: asyncio.Queue):
                 if "text" in block:
                     advisory += block["text"]
 
-        await queue.put({
-            "type": "advisory",
-            "text": advisory or "Unable to analyze routes at this time.",
-        })
+        if not advisory:
+            advisory = "Unable to analyze routes at this time."
+
+        # Stream the advisory as word-group token events
+        for chunk in _chunk_text(advisory):
+            await queue.put({"type": "token", "text": chunk})
+            await asyncio.sleep(0.015)  # ~15ms per chunk — fast but visible
+
         await queue.put({
             "type": "done",
             "tool_calls": result.get("toolCallCount", collector.count) if result else 0,
