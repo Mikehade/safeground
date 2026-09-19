@@ -54,6 +54,10 @@ export const useScoutStore = create<ScoutState>((set, get) => ({
       toolEvents: [],
     });
 
+    // 3-minute safety timeout — if no data arrives the stream is dead
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 180_000);
+
     try {
       await streamScout(
         {
@@ -97,14 +101,21 @@ export const useScoutStore = create<ScoutState>((set, get) => ({
               break;
           }
         },
+        controller.signal,
       );
     } catch (e: any) {
+      const msg =
+        e?.name === 'AbortError'
+          ? 'Analysis timed out — try a shorter route or try again.'
+          : e?.message || 'Failed to analyze routes. Try again.';
       set({
-        error: e?.message || 'Failed to analyze routes. Try again.',
+        error: msg,
         loading: false,
         done: true,
         streaming: false,
       });
+    } finally {
+      clearTimeout(timeout);
     }
   },
 
