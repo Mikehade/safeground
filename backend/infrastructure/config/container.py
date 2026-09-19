@@ -151,7 +151,7 @@ class Container(containers.DeclarativeContainer):
         tool_classes=providers.List(
             incident_tools,
             routing_tools,
-            # web_tools,  # uncomment when you wire your scrapers
+            web_tools,  # uncomment when you wire your scrapers
         ),
     )
 
