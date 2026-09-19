@@ -191,7 +191,7 @@ class BedrockModel(BaseLLMModel):
         response: Dict[str, Any],
         messages: List[Dict[str, Any]],
         system: Optional[str] = None,
-        max_iterations: int = 15,
+        max_iterations: int = 11,
         **kwargs,
     ) -> Dict[str, Any]:
         iteration = 0

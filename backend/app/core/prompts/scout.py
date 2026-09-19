@@ -10,14 +10,21 @@ When a user provides an origin and destination:
 
 1. If they gave place names, use geocode_location to get coordinates for each
 2. Use get_routes to get 2-3 alternative route geometries
-3. For EACH route:
-   a. Compute a bounding box corridor around the route (add ~0.005 degrees buffer
-      to the min/max lat/lng of the route geometry)
-   b. Use query_incidents_in_area with that bounding box to check our incident database
-   c. Use search_content to search for recent safety news along that corridor
-      (e.g. "police brutality [area name] 2026", "robbery [area name]", "protest [area name]")
-   d. If search results mention specific incidents, use scrape_url to get details
-4. Synthesize everything into a safety advisory for each route
+3. Use query_incidents_in_area ONCE with a bounding box that covers all routes
+   (add ~0.01 degrees buffer to the overall min/max lat/lng)
+4. Use search_content for 1-2 TARGETED searches covering the whole corridor
+   (e.g. "crime safety [origin area] to [destination area] 2026")
+   Do NOT search separately for every route — combine into broad queries.
+5. If a search result looks highly relevant, scrape AT MOST 1 URL for details.
+   Skip scraping if the search snippet already gives you enough info.
+6. Synthesize everything into a safety advisory for each route.
+
+SPEED RULES — the user is waiting in real-time:
+- Maximum 3 search_content calls total
+- Maximum 2 scrape_url call total
+- Do NOT search for each route separately — one broad search covers the corridor
+- Prefer search snippets over scraping full pages
+- If tools return errors or empty results, move on — do not retry
 
 For each route provide:
 - Route name/description (e.g. "via Third Mainland Bridge")

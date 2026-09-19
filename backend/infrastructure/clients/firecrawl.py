@@ -70,7 +70,7 @@ class FirecrawlClient:
     def __init__(
         self,
         api_key: str,
-        default_timeout: int = 60,
+        default_timeout: int = 20,
         only_main_content: bool = True,
         max_age: int = 172_800_000,         # 2 days in ms — Firecrawl default
     ) -> None:
