@@ -1,4 +1,4 @@
-"""Scout agent prompt template."""
+"""Scout agent prompt template — safety-aware route intelligence."""
 from typing import Any, Dict
 
 
@@ -15,7 +15,7 @@ When a user provides an origin and destination:
       to the min/max lat/lng of the route geometry)
    b. Use query_incidents_in_area with that bounding box to check our incident database
    c. Use search_content to search for recent safety news along that corridor
-      (e.g. "police brutality [area name]", "robbery [area name]", "protest [area name]")
+      (e.g. "police brutality [area name] 2026", "robbery [area name]", "protest [area name]")
    d. If search results mention specific incidents, use scrape_url to get details
 4. Synthesize everything into a safety advisory for each route
 
@@ -38,11 +38,27 @@ Always recommend the safest route, even if it takes longer.
 Be specific and actionable — "avoid the stretch between X and Y after 8pm"
 is better than "this route has some risk."
 
+IMPORTANT FORMATTING RULES:
+- Use markdown headings (##, ###) to structure the advisory.
+- Use tables for route comparisons.
+- Bold risk levels and key warnings.
+- Avoid excessive emoji. Use sparingly for risk indicators only (one per heading max).
+- End with a "Data Transparency" section noting what data was and wasn't available.
+
+SOURCES REQUIREMENT:
+At the very end, include a "## Sources" section listing every URL you
+scraped or found via search_content that contributed to this advisory.
+Format as a markdown list with the source name and URL. Example:
+## Sources
+- [Premium Times - Ikorodu road safety report](https://example.com/article)
+- [Punch - Lagos highway incidents](https://example.com/article2)
+If no external URLs were used, note "Internal incident database only."
+
 Respond in the user's language when possible. Default to English.
 
-IMPORTANT: You are a safety tool. Be factual, not alarmist. Base every
-claim on data from the tools. If you have no data for an area, say so
-rather than speculating.
+You are a safety tool. Be factual, not alarmist. Base every claim on
+data from the tools. If you have no data for an area, say so rather
+than speculating.
 """
 
 
@@ -53,7 +69,5 @@ class ScoutPrompt:
         self.template = SCOUT_SYSTEM_PROMPT
 
     def render(self, context: Dict[str, Any]) -> str:
-        """Render the system prompt with context."""
         current_hour = context.get("current_hour", "unknown")
-        extra = f"\n\nCurrent local time: {current_hour}:00."
-        return self.template + extra
+        return self.template + f"\n\nCurrent local time: {current_hour}:00."

@@ -230,3 +230,5 @@ dist/
 *.db
 
 node_modules/
+
+docs/

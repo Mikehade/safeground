@@ -1,7 +1,10 @@
 import { useState } from 'react';
+import { MapPin, Navigation } from 'lucide-react';
 import { useScoutStore } from '../../store/useScoutStore';
 
-export default function ScoutInputs() {
+interface Props { onShowMain?: () => void; }
+
+export default function ScoutInputs({ onShowMain }: Props) {
   const { loading, analyzeRoutes, clear } = useScoutStore();
   const [originName, setOriginName] = useState('');
   const [destName, setDestName] = useState('');
@@ -14,72 +17,51 @@ export default function ScoutInputs() {
   return (
     <div className="flex flex-col gap-4 p-5">
       <div>
-        <h2 className="font-display text-base font-semibold mb-1">Check your route</h2>
-        <p className="text-xs text-ground-800/50">
-          Enter your origin and destination. We'll scan incident databases
-          and live sources for each possible route.
+        <h2 className="font-display text-[15px] font-semibold text-[#2d2a24] mb-1">Check your route</h2>
+        <p className="text-[11px] text-[#9b9590] leading-relaxed">
+          We'll scan incident databases and live web sources for each possible route.
         </p>
       </div>
 
-      <div className="flex flex-col gap-3">
-        <div>
-          <label className="block text-xs font-medium text-ground-800/60 mb-1">From</label>
-          <input
-            type="text"
-            placeholder="e.g. Ikorodu Garage, Lagos"
-            value={originName}
+      <div className="flex flex-col gap-2.5">
+        <div className="relative">
+          <MapPin size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#b5b0aa]" />
+          <input type="text" placeholder="Where are you now?" value={originName}
             onChange={(e) => setOriginName(e.target.value)}
-            className="w-full px-3 py-2.5 rounded-lg border border-ground-200 bg-ground-50
-                       text-sm placeholder:text-ground-800/25 focus:outline-none
-                       focus:border-ground-800 focus:bg-white transition-colors"
-          />
+            className="w-full pl-8 pr-3 py-2.5 rounded-xl border border-[#e8e6e1] bg-[#faf9f7]
+                       text-sm placeholder:text-[#c5c0ba] focus:outline-none focus:border-[#6b6560]
+                       focus:bg-white transition-colors" />
         </div>
-        <div>
-          <label className="block text-xs font-medium text-ground-800/60 mb-1">To</label>
-          <input
-            type="text"
-            placeholder="e.g. Redemption Camp"
-            value={destName}
+        <div className="relative">
+          <Navigation size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#b5b0aa]" />
+          <input type="text" placeholder="Where are you going?" value={destName}
             onChange={(e) => setDestName(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleAnalyze()}
-            className="w-full px-3 py-2.5 rounded-lg border border-ground-200 bg-ground-50
-                       text-sm placeholder:text-ground-800/25 focus:outline-none
-                       focus:border-ground-800 focus:bg-white transition-colors"
-          />
+            className="w-full pl-8 pr-3 py-2.5 rounded-xl border border-[#e8e6e1] bg-[#faf9f7]
+                       text-sm placeholder:text-[#c5c0ba] focus:outline-none focus:border-[#6b6560]
+                       focus:bg-white transition-colors" />
         </div>
 
-        <button
-          onClick={handleAnalyze}
+        <button onClick={handleAnalyze}
           disabled={loading || !originName.trim() || !destName.trim()}
-          className="w-full py-2.5 rounded-lg bg-ground-900 text-white font-medium text-sm
-                     hover:bg-ground-800 disabled:opacity-30 disabled:cursor-not-allowed
-                     transition-colors active:scale-[0.98]"
-        >
+          className="w-full py-2.5 rounded-xl bg-[#2d2a24] text-white font-medium text-sm
+                     hover:bg-[#3a3732] disabled:opacity-25 disabled:cursor-not-allowed
+                     transition-colors active:scale-[0.98]">
           {loading ? (
             <span className="flex items-center justify-center gap-2">
-              <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               Analyzing…
             </span>
-          ) : (
-            'Check routes'
-          )}
+          ) : 'Check routes'}
         </button>
       </div>
 
-      {loading && (
-        <div className="flex flex-col gap-2 py-2 text-xs text-ground-800/40">
-          <p>Scanning incident database…</p>
-          <p>Searching live web sources…</p>
-          <p>This may take 30–60 seconds.</p>
-        </div>
+      {!loading && (
+        <button onClick={() => { clear(); setOriginName(''); setDestName(''); }}
+          className="text-[11px] text-[#b5b0aa] hover:text-[#6b6560] self-start transition-colors">
+          Clear
+        </button>
       )}
-
-      <button
-        onClick={() => { clear(); setOriginName(''); setDestName(''); }}
-        className="text-xs text-ground-800/40 hover:text-ground-900 self-start transition-colors"
-      >
-        Clear
-      </button>
     </div>
   );
 }
